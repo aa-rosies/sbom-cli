@@ -46,8 +46,8 @@ Tests mirror the `src/` layout under `tests/sbom_cli/`.
 
 ## Logging Claude Usage
 
-Whenever you do something, make an update to the @ClaudeLogs.md file with a brief description of what you did. It should
-be formatted:
+Whenever you run ANY session (even if it's just a discussion or question), make an update to the @ClaudeLogs.md file
+with a brief description of what you did. It should be formatted:
 
 ```markdown
 ## [Short description of action]
