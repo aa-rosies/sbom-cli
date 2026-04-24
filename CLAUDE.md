@@ -27,14 +27,32 @@ uv tool install . --reinstall
 
 ## Architecture
 
-This is a [Typer](https://typer.tiangolo.com/)-based CLI app. The entrypoint is `src/sbom_cli/main.py`, which registers commands and subcommand groups on the root `app = typer.Typer()` instance.
+This is a [Typer](https://typer.tiangolo.com/)-based CLI app. The entrypoint is `src/sbom_cli/main.py`, which registers
+commands and subcommand groups on the root `app = typer.Typer()` instance.
 
 **Two patterns for adding commands:**
 
-1. **Top-level commands** (`ingest`, `query`): decorated with `@app.command()` in `main.py`, delegating to a function imported from `src/sbom_cli/commands/`.
+1. **Top-level commands** (`ingest`, `query`): decorated with `@app.command()` in `main.py`, delegating to a function
+   imported from `src/sbom_cli/commands/`.
 
-2. **Subcommand groups** (`example`): a separate `typer.Typer()` instance defined in `src/sbom_cli/subcommands/`, then registered via `app.add_typer(example.app, name="example")` in `main.py`. Each command in the group uses `@app.command()` on the subcommand's own `app`.
+2. **Subcommand groups** (`example`): a separate `typer.Typer()` instance defined in `src/sbom_cli/subcommands/`, then
+   registered via `app.add_typer(example.app, name="example")` in `main.py`. Each command in the group uses
+   `@app.command()` on the subcommand's own `app`.
 
-Shared utilities live in `src/sbom_cli/lib/`. [Rich](https://github.com/Textualize/rich) is available for formatted terminal output (tables, styled text, etc.).
+Shared utilities live in `src/sbom_cli/lib/`. [Rich](https://github.com/Textualize/rich) is available for formatted
+terminal output (tables, styled text, etc.).
 
 Tests mirror the `src/` layout under `tests/sbom_cli/`.
+
+## Logging Claude Usage
+
+Whenever you do something, make an update to the @ClaudeLogs.md file with a brief description of what you did. It should
+be formatted:
+
+```markdown
+## [Short description of action]
+
+- [Optional: more details about the action, if needed, no more than 5 bullet points]
+
+Result: [Helpful or not helpful, and why (keep it brief)]
+```
