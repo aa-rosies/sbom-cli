@@ -1,0 +1,19 @@
+# Default ignored files
+/shelf/
+# Editor-based HTTP Client requests
+/httpRequests/
+
+# PyCharm - user-specific
+workspace.xml
+tasks.xml
+usage.statistics.xml
+shelf/
+dictionaries/
+aws.xml
+awsToolkit.xml
+
+# Shared OK to commit:
+# .idea/projectSettingsUpdater.xml
+# .idea/inspectionProfiles/
+# .idea/modules.xml
+# .idea/*.iml
