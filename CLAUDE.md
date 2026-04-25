@@ -44,10 +44,15 @@ terminal output (tables, styled text, etc.).
 
 Tests mirror the `src/` layout under `tests/sbom_cli/`.
 
+## SBOM information
+
+The JSON schema for CycloneDX SBOM is defined in @schemas/bom-1.6.schema.json. It has been copied from
+the [official spec](https://github.com/CycloneDX/specification/blob/master/schema/bom-1.6.schema.json)
+
 ## Logging Claude Usage
 
-Whenever you run ANY session (even if it's just a discussion or question), make an update to the @ClaudeLogs.md file
-with a brief description of what you did. It should be formatted:
+When the user asks you to log usage (even if the session was just a discussion and you didn't update any code), make an
+update to the @ClaudeLogs.md file with a brief description of what you did. It should be formatted:
 
 ```markdown
 ## [Short description of action]

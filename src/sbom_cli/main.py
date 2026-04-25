@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
@@ -29,9 +30,11 @@ def main(
 
 
 @app.command()
-def ingest():
-    """Ingest SBOM data"""
-    ingest_command()
+def ingest(
+    filepath: Annotated[Path, typer.Argument(help="Path to a CycloneDX 1.6 JSON SBOM file")],
+):
+    """Ingest a CycloneDX 1.6 SBOM file"""
+    ingest_command(filepath)
 
 
 @app.command()
