@@ -8,6 +8,8 @@ from sbom_cli.lib.utils import truncate
 
 app = typer.Typer(help="Example subcommand", no_args_is_help=True)
 
+console = Console()
+
 
 @app.command()
 def info():
@@ -19,5 +21,4 @@ def info():
     table.add_row("Python", platform.python_version())
     table.add_row("Machine", truncate(platform.machine(), 20))
 
-    console = Console()
     console.print(table)

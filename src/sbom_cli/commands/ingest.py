@@ -1,12 +1,11 @@
 from pathlib import Path
 
 import typer
-from rich.console import Console
 
 from sbom_cli.db import get_connection, init_db
-from sbom_cli.db.repository import insert_bom, load_and_validate
-
-console = Console()
+from sbom_cli.db.repository import insert_bom
+from sbom_cli.lib.output import console
+from sbom_cli.lib.sbom import load_and_validate
 
 
 def ingest_command(filepath: Path) -> None:

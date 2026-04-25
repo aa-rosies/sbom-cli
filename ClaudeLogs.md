@@ -25,6 +25,13 @@ commands.
 
 Result: Helpful — fully working ingestion pipeline from CLI to SQLite, ready for the query command to build on.
 
-> Note - I (Alex) used plan mode and iterated a over a few ideas, I also thoroughly reviewed after this change.
+> Note - I (Alex) used plan mode and iterated over a few ideas, I also thoroughly reviewed after this change.
 
+## Tidied up db module organization
 
+- Moved `load_and_validate()` from `db/repository.py` to `lib/sbom.py` — it's SBOM parsing, not DB logic.
+- Deleted unused `db/models.py` (dataclasses were never imported).
+- Updated `ingest.py` to use shared `console` from `lib/output.py` instead of creating its own.
+- Moved corresponding tests to match new file locations.
+
+Result: Helpful — cleaner separation of concerns, all 21 tests still passing.
