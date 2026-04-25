@@ -45,3 +45,11 @@ Result: Helpful — cleaner separation of concerns, all 21 tests still passing.
 - Added 17 new tests (11 repository + 6 CLI integration) — all 38 tests passing, ruff clean.
 
 Result: Helpful — query command works end-to-end with clean layering (repository → command → CLI).
+
+## Refactored query tests and added e2e tests
+
+- Rewrote `test_query.py` to call `query_command()` directly instead of going through CliRunner — simpler and faster.
+- Created `tests/sbom_cli/test_e2e.py` with 4 end-to-end tests using CliRunner that exercise the full ingest→query flow.
+- All 42 tests passing, ruff clean.
+
+Result: Helpful — cleaner test separation: unit tests call functions directly, e2e tests exercise the full CLI.
