@@ -61,3 +61,11 @@ Result: Helpful — cleaner test separation: unit tests call functions directly,
 - Tests that use in-memory SQLite still call `init_db()` directly on their own connections.
 
 Result: Helpful — eliminated the "just know to call init_db" footgun, all 42 tests passing.
+
+## Enhanced test coverage for multi-BOM and edge cases
+
+- Created second fixture (`sample-cdx-1.6-second.json`) with overlapping components and shared licenses.
+- Added 8 new tests: multi-BOM ingestion, component isolation per BOM, license deduplication across BOMs, same component name with different versions, multiple components sharing a license, cross-BOM license queries.
+- All 50 tests passing, ruff clean.
+
+Result: Helpful — much better coverage of real-world scenarios (multiple SBOMs, shared dependencies, license reuse).

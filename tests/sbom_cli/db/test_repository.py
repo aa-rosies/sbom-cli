@@ -26,6 +26,11 @@ def sample_sbom():
     return load_and_validate(FIXTURES_DIR / "sample-cdx-1.6.json")
 
 
+@pytest.fixture
+def second_sbom():
+    return load_and_validate(FIXTURES_DIR / "sample-cdx-1.6-second.json")
+
+
 class TestInsertBom:
     def test_inserts_bom_record(self, conn, sample_sbom):
         bom_id = insert_bom(conn, sample_sbom, "/tmp/test.json")
@@ -118,6 +123,37 @@ class TestInsertBom:
         metadata = json.loads(row["metadata_json"])
         assert metadata["timestamp"] == "2024-01-15T10:00:00Z"
 
+    def test_multiple_boms(self, conn, sample_sbom, second_sbom):
+        bom_id_1 = insert_bom(conn, sample_sbom, "/tmp/first.json")
+        bom_id_2 = insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        assert bom_id_1 != bom_id_2
+        bom_count = conn.execute("SELECT COUNT(*) FROM bom").fetchone()[0]
+        assert bom_count == 2
+
+    def test_multiple_boms_components_isolated(self, conn, sample_sbom, second_sbom):
+        bom_id_1 = insert_bom(conn, sample_sbom, "/tmp/first.json")
+        bom_id_2 = insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        count_1 = conn.execute(
+            "SELECT COUNT(*) FROM component WHERE bom_id = ?", (bom_id_1,)
+        ).fetchone()[0]
+        count_2 = conn.execute(
+            "SELECT COUNT(*) FROM component WHERE bom_id = ?", (bom_id_2,)
+        ).fetchone()[0]
+        assert count_1 == 5  # 4 components + metadata component
+        assert count_2 == 4  # 3 components + metadata component
+
+    def test_multiple_boms_shared_license_deduplication(self, conn, sample_sbom, second_sbom):
+        """BSD-3-Clause appears in both BOMs but should be one license row."""
+        insert_bom(conn, sample_sbom, "/tmp/first.json")
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        bsd_rows = conn.execute(
+            "SELECT COUNT(*) FROM license WHERE license_id = 'BSD-3-Clause'"
+        ).fetchone()[0]
+        assert bsd_rows == 1
+
 
 class TestQueryComponents:
     def test_exact_name_match(self, conn, sample_sbom):
@@ -153,6 +189,24 @@ class TestQueryComponents:
         rows = query_components(conn, "requests")
         assert rows[0]["source_path"] == "/tmp/test.json"
 
+    def test_same_name_different_versions_across_boms(self, conn, sample_sbom, second_sbom):
+        """requests 2.31.0 in first BOM, requests 2.32.0 in second."""
+        insert_bom(conn, sample_sbom, "/tmp/first.json")
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        rows = query_components(conn, "requests")
+        assert len(rows) == 2
+        versions = {r["version"] for r in rows}
+        assert versions == {"2.31.0", "2.32.0"}
+
+    def test_same_name_filtered_by_version(self, conn, sample_sbom, second_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/first.json")
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        rows = query_components(conn, "requests", version="2.32.0")
+        assert len(rows) == 1
+        assert rows[0]["source_path"] == "/tmp/second.json"
+
 
 class TestQueryByLicense:
     def test_spdx_id_match(self, conn, sample_sbom):
@@ -184,3 +238,32 @@ class TestQueryByLicense:
         assert len(rows) == 1
         assert rows[0]["license_id"] == "Apache-2.0"
         assert rows[0]["name"] == "requests"
+
+    def test_multiple_components_same_license(self, conn, second_sbom):
+        """flask and click both have BSD-3-Clause in the second fixture."""
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        rows = query_by_license(conn, "BSD-3-Clause")
+        names = {r["name"] for r in rows}
+        assert "flask" in names
+        assert "click" in names
+        assert len(rows) == 2
+
+    def test_shared_license_across_boms(self, conn, sample_sbom, second_sbom):
+        """BSD-3-Clause used by idna (first BOM) and flask+click (second BOM)."""
+        insert_bom(conn, sample_sbom, "/tmp/first.json")
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        rows = query_by_license(conn, "BSD-3-Clause")
+        names = {r["name"] for r in rows}
+        assert names == {"idna", "flask", "click"}
+
+    def test_license_query_across_boms(self, conn, sample_sbom, second_sbom):
+        """Apache-2.0 used by requests in both BOMs (different versions)."""
+        insert_bom(conn, sample_sbom, "/tmp/first.json")
+        insert_bom(conn, second_sbom, "/tmp/second.json")
+
+        rows = query_by_license(conn, "Apache-2.0")
+        assert len(rows) == 2
+        versions = {r["version"] for r in rows}
+        assert versions == {"2.31.0", "2.32.0"}
