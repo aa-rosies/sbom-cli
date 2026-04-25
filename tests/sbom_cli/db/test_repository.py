@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from sbom_cli.db import init_db
-from sbom_cli.db.repository import insert_bom
+from sbom_cli.db.repository import insert_bom, query_by_license, query_components
 from sbom_cli.lib.sbom import load_and_validate
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent / "fixtures"
@@ -119,3 +119,68 @@ class TestInsertBom:
         assert metadata["timestamp"] == "2024-01-15T10:00:00Z"
 
 
+class TestQueryComponents:
+    def test_exact_name_match(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "requests")
+        assert len(rows) == 1
+        assert rows[0]["name"] == "requests"
+        assert rows[0]["version"] == "2.31.0"
+
+    def test_name_with_version(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "requests", version="2.31.0")
+        assert len(rows) == 1
+        assert rows[0]["purl"] == "pkg:pypi/requests@2.31.0"
+
+    def test_wrong_version_returns_empty(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "requests", version="9.9.9")
+        assert rows == []
+
+    def test_no_match_returns_empty(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "nonexistent")
+        assert rows == []
+
+    def test_substring_does_not_match(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "req")
+        assert rows == []
+
+    def test_includes_source_path(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_components(conn, "requests")
+        assert rows[0]["source_path"] == "/tmp/test.json"
+
+
+class TestQueryByLicense:
+    def test_spdx_id_match(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_by_license(conn, "MIT")
+        assert len(rows) == 1
+        assert rows[0]["name"] == "urllib3"
+
+    def test_spdx_id_case_insensitive(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_by_license(conn, "mit")
+        assert len(rows) == 1
+        assert rows[0]["name"] == "urllib3"
+
+    def test_freeform_name_match(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_by_license(conn, "Mozilla")
+        assert len(rows) == 1
+        assert rows[0]["name"] == "certifi"
+
+    def test_no_match_returns_empty(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_by_license(conn, "AGPL-3.0")
+        assert rows == []
+
+    def test_includes_license_info(self, conn, sample_sbom):
+        insert_bom(conn, sample_sbom, "/tmp/test.json")
+        rows = query_by_license(conn, "Apache-2.0")
+        assert len(rows) == 1
+        assert rows[0]["license_id"] == "Apache-2.0"
+        assert rows[0]["name"] == "requests"

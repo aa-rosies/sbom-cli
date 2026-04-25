@@ -38,9 +38,13 @@ def ingest(
 
 
 @app.command()
-def query():
-    """Query SBOM data"""
-    query_command()
+def query(
+    component: Annotated[Optional[str], typer.Option("--component", "-c", help="Component name to search")] = None,
+    version: Annotated[Optional[str], typer.Option("--version", help="Version filter (requires --component)")] = None,
+    license: Annotated[Optional[str], typer.Option("--license", "-l", help="License to search")] = None,
+):
+    """Query ingested SBOM data"""
+    query_command(component, version, license)
 
 
 if __name__ == "__main__":

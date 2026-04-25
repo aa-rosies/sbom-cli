@@ -129,3 +129,38 @@ def _link_license(
     )
 
 
+def query_components(
+    conn: sqlite3.Connection, name: str, version: str | None = None
+) -> list[sqlite3.Row]:
+    """Find components by exact name, optionally filtered by version."""
+    sql = """
+        SELECT c.name, c.version, c.type, c.purl, b.source_path
+        FROM component c
+        JOIN bom b ON b.id = c.bom_id
+        WHERE c.name = ?
+    """
+    params: list[str] = [name]
+    if version is not None:
+        sql += " AND c.version = ?"
+        params.append(version)
+    sql += " ORDER BY c.name, c.version"
+    return conn.execute(sql, params).fetchall()
+
+
+def query_by_license(
+    conn: sqlite3.Connection, license: str
+) -> list[sqlite3.Row]:
+    """Find components by license (matches SPDX id or freeform name)."""
+    return conn.execute(
+        """
+        SELECT c.name, c.version, c.purl, l.license_id, l.license_name, b.source_path
+        FROM component c
+        JOIN component_license cl ON cl.component_id = c.id
+        JOIN license l ON l.id = cl.license_id
+        JOIN bom b ON b.id = c.bom_id
+        WHERE l.license_id = ? COLLATE NOCASE
+           OR l.license_name LIKE ? COLLATE NOCASE
+        ORDER BY c.name, c.version
+        """,
+        (license, f"%{license}%"),
+    ).fetchall()
