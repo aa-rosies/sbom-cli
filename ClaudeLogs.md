@@ -69,3 +69,10 @@ Result: Helpful — eliminated the "just know to call init_db" footgun, all 42 t
 - All 50 tests passing, ruff clean.
 
 Result: Helpful — much better coverage of real-world scenarios (multiple SBOMs, shared dependencies, license reuse).
+
+## Added multi-BOM e2e test
+
+- Added e2e test that ingests both fixtures then queries for multi-row results (requests at two versions, BSD-3-Clause across 3 components in 2 BOMs).
+- All 51 tests passing.
+
+Result: Helpful — e2e tests now cover the multi-row case.
