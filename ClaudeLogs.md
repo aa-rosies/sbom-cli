@@ -35,3 +35,13 @@ Result: Helpful — fully working ingestion pipeline from CLI to SQLite, ready f
 - Moved corresponding tests to match new file locations.
 
 Result: Helpful — cleaner separation of concerns, all 21 tests still passing.
+
+## Implemented query command
+
+- Added `query_components()` and `query_by_license()` to `db/repository.py` — pure SQL query functions, testable with in-memory SQLite.
+- Implemented `commands/query.py` with Rich table output for both query modes.
+- Wired up `--component` / `-c`, `--version`, `--license` / `-l` options in `main.py` (mutually exclusive).
+- Component search uses exact name match; license search is case-insensitive and matches SPDX id or freeform name.
+- Added 17 new tests (11 repository + 6 CLI integration) — all 38 tests passing, ruff clean.
+
+Result: Helpful — query command works end-to-end with clean layering (repository → command → CLI).
