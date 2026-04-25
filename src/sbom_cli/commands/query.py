@@ -1,7 +1,7 @@
 import typer
 from rich.table import Table
 
-from sbom_cli.db import get_connection, init_db
+from sbom_cli.db import get_connection
 from sbom_cli.db.repository import query_by_license, query_components
 from sbom_cli.lib.output import console
 
@@ -22,7 +22,6 @@ def query_command(
 
     conn = get_connection()
     try:
-        init_db(conn)
         if component:
             _show_components(conn, component, version)
         else:

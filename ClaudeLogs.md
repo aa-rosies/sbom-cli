@@ -53,3 +53,11 @@ Result: Helpful — query command works end-to-end with clean layering (reposito
 - All 42 tests passing, ruff clean.
 
 Result: Helpful — cleaner test separation: unit tests call functions directly, e2e tests exercise the full CLI.
+
+## Moved schema init into get_connection()
+
+- `get_connection()` now calls `init_schema()` automatically — callers get a ready-to-use DB.
+- Removed manual `init_db()` calls from `ingest.py` and `query.py`.
+- Tests that use in-memory SQLite still call `init_db()` directly on their own connections.
+
+Result: Helpful — eliminated the "just know to call init_db" footgun, all 42 tests passing.

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 
-from sbom_cli.db import get_connection, init_db
+from sbom_cli.db import get_connection
 from sbom_cli.db.repository import insert_bom
 from sbom_cli.lib.output import console
 from sbom_cli.lib.sbom import load_and_validate
@@ -22,7 +22,6 @@ def ingest_command(filepath: Path) -> None:
 
     conn = get_connection()
     try:
-        init_db(conn)
         bom_id = insert_bom(conn, sbom, str(filepath.resolve()))
         component_count = conn.execute(
             "SELECT COUNT(*) FROM component WHERE bom_id = ?", (bom_id,)
