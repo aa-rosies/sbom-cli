@@ -134,7 +134,7 @@ def query_components(
 ) -> list[sqlite3.Row]:
     """Find components by exact name, optionally filtered by version."""
     sql = """
-        SELECT c.name, c.version, c.type, c.purl, b.source_path
+        SELECT c.name, c.version, c.type, c.purl, b.id AS bom_id, b.source_path
         FROM component c
         JOIN bom b ON b.id = c.bom_id
         WHERE c.name = ?
@@ -153,7 +153,7 @@ def query_by_license(
     """Find components by license (matches SPDX id or freeform name)."""
     return conn.execute(
         """
-        SELECT c.name, c.version, c.purl, l.license_id, l.license_name, b.source_path
+        SELECT c.name, c.version, c.purl, l.license_id, l.license_name, b.id AS bom_id, b.source_path
         FROM component c
         JOIN component_license cl ON cl.component_id = c.id
         JOIN license l ON l.id = cl.license_id

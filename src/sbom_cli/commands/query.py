@@ -1,3 +1,5 @@
+from pathlib import PurePosixPath
+
 import typer
 from rich.table import Table
 
@@ -41,15 +43,16 @@ def _show_components(conn, name: str, version: str | None) -> None:
     table.add_column("Version", style="green")
     table.add_column("Type")
     table.add_column("PURL", style="dim")
-    table.add_column("Source", style="dim")
+    table.add_column("BOM", style="dim")
 
     for row in rows:
+        filename = PurePosixPath(row["source_path"]).name
         table.add_row(
             row["name"],
             row["version"] or "",
             row["type"],
             row["purl"] or "",
-            row["source_path"],
+            f"{filename} (#{row['bom_id']})",
         )
 
     console.print(table)
@@ -66,16 +69,17 @@ def _show_by_license(conn, license: str) -> None:
     table.add_column("Version", style="green")
     table.add_column("License")
     table.add_column("PURL", style="dim")
-    table.add_column("Source", style="dim")
+    table.add_column("BOM", style="dim")
 
     for row in rows:
         license_display = row["license_id"] or row["license_name"] or ""
+        filename = PurePosixPath(row["source_path"]).name
         table.add_row(
             row["name"],
             row["version"] or "",
             license_display,
             row["purl"] or "",
-            row["source_path"],
+            f"{filename} (#{row['bom_id']})",
         )
 
     console.print(table)

@@ -76,3 +76,12 @@ Result: Helpful — much better coverage of real-world scenarios (multiple SBOMs
 - All 51 tests passing.
 
 Result: Helpful — e2e tests now cover the multi-row case.
+
+## Updated query output to show filename + bom ID
+
+- Changed query display from full source path to `filename (#bom_id)` (e.g. `sample-cdx-1.6.json (#1)`).
+- Added `b.id AS bom_id` to both repository query functions.
+- Renamed table column from "Source" to "BOM".
+- All 51 tests passing.
+
+Result: Helpful — cleaner, more readable output.
