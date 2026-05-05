@@ -1,4 +1,5 @@
 {
+  "$schema": "https://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "serialNumber": "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79",
@@ -79,11 +80,17 @@
   "dependencies": [
     {
       "ref": "my-app",
-      "dependsOn": ["requests"]
+      "dependsOn": [
+        "requests"
+      ]
     },
     {
       "ref": "requests",
-      "dependsOn": ["urllib3", "certifi", "idna"]
+      "dependsOn": [
+        "urllib3",
+        "certifi",
+        "idna"
+      ]
     },
     {
       "ref": "urllib3",
